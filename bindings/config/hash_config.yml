@@ -1,0 +1,5 @@
+name: Blake2dBindings
+output: '../../lib/crypto/hash/libsodium/blade2d_bindings.dart'
+headers:
+  entry-points:
+    - '../include/sodium/crypto_generichash.h'

@@ -1,0 +1,5 @@
+name: XChaCha20Bindings
+output: '../../lib/crypto/cipher/libsodium/xchacha20_bindings.dart'
+headers:
+  entry-points:
+    - '../include/sodium/crypto_secretbox_xchacha20poly1305.h'

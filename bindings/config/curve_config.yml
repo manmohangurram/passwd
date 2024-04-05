@@ -1,0 +1,5 @@
+name: Curve25519Bindings
+output: '../../lib/crypto/curve/libsodium/curve25519_bindings.dart'
+headers:
+  entry-points:
+    - '../include/sodium/crypto_kx.h'
