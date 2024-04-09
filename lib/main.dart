@@ -8,6 +8,7 @@ import 'package:passwd/features/tag/domain/cipher_tag.dart';
 import 'package:realm/realm.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   var realm =
       Realm(Configuration.local([CipherRecord.schema, CipherTag.schema]));
   runApp(GetMaterialApp(

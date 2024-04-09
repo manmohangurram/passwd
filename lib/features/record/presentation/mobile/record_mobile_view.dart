@@ -9,6 +9,18 @@ class RecordMobileView extends StatelessWidget {
     return Scaffold(
         backgroundColor: Theme.of(context).primaryColorDark,
         extendBody: true,
+        appBar: AppBar(
+            backgroundColor: Theme.of(context).primaryColorDark,
+            title: RichText(
+              text: TextSpan(children: [
+                TextSpan(
+                    text: "Pass",
+                    style: Theme.of(context).textTheme.titleLarge),
+                TextSpan(
+                    text: "wd",
+                    style: Theme.of(context).primaryTextTheme.titleLarge)
+              ]),
+            )),
         body: const RecordListView());
   }
 }
