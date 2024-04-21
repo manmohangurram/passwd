@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:passwd/features/record/domain/record.dart';
-import 'package:passwd/utils/logo_mapper.dart';
+import 'package:passwd/utils/logo_retriver.dart';
 
 class RecordItem extends StatelessWidget {
   const RecordItem({super.key, required this.record});
 
   final Record record;
-  static final LogoMapper logoMapper = LogoMapper();
+  static final LogoRetriever logoRetriever = LogoRetriever();
   static const String USERNAME_COPIED = "Username copied to clipboard";
   static const String PASS_COPIED = "Password copied to clipboard";
 
@@ -27,16 +27,19 @@ class RecordItem extends StatelessWidget {
 
   Widget _createLeft(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [_createLogo(), _createDiscription(context)],
     );
   }
 
   Widget _createLogo() {
-    return SizedBox(
-      width: 45,
-      height: 45,
-      child: logoMapper.getImage(record.metadata.url),
-    );
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+        child: SizedBox(
+          width: 50,
+          height: 50,
+          child: logoRetriever.getImage(record.metadata.url),
+        ));
   }
 
   Widget _createDiscription(BuildContext context) {
