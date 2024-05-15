@@ -1,5 +1,4 @@
-import 'dart:ffi';
-
+import 'package:sodium/sodium.dart';
 import 'package:passwd/features/record/application/record_crypto.dart';
 import 'package:passwd/features/record/data/local_record_repository.dart';
 import 'package:passwd/features/record/domain/cipher_record.dart';
@@ -7,9 +6,8 @@ import 'package:passwd/features/record/domain/record.dart';
 import 'package:realm/realm.dart';
 
 class RecordService {
-  RecordService(
-      this.realm, List<int> sharedKey, DynamicLibrary dynamicLibrary) {
-    recordCrypto = RecordCrypto(sharedKey, dynamicLibrary);
+  RecordService(this.realm, List<int> sharedKey, Sodium sodium) {
+    recordCrypto = RecordCrypto(sharedKey, sodium);
   }
 
   final Realm realm;

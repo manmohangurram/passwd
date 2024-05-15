@@ -1,75 +1,79 @@
-import 'dart:ffi';
-
-import 'package:ffi/ffi.dart';
+import 'package:sodium/sodium.dart';
 import 'package:flutter/foundation.dart';
 import 'package:passwd/crypto/curve/curve_crypto.dart';
-import 'package:passwd/crypto/curve/libsodium/curve25519_bindings.dart';
 import 'package:passwd/crypto/curve/models/curve_keypair.dart';
-import 'package:passwd/utils/pointer_bytes.dart';
 
 class LibSodiumCurveCrypto implements CurveCrypto {
-  LibSodiumCurveCrypto(DynamicLibrary dynamicLibrary) {
-    bindings = Curve25519Bindings(dynamicLibrary);
-  }
+  LibSodiumCurveCrypto(this.sodium);
 
-  late Curve25519Bindings bindings;
+  final Sodium sodium;
 
   @override
   Future<CurveKeyPair> generateNewKeyPair() async {
-    var allocator = Arena();
+    final keyPair = sodium.crypto.kx.keyPair();
 
-    Pointer<UnsignedChar> publicKeyPointer =
-        allocator.allocate(bindings.crypto_kx_publickeybytes());
-    Pointer<UnsignedChar> privateKeyPointer =
-        allocator.allocate(bindings.crypto_kx_secretkeybytes());
+    return CurveKeyPair(keyPair.secretKey.extractBytes(), keyPair.publicKey);
 
-    bindings.crypto_kx_keypair(publicKeyPointer, privateKeyPointer);
+    // var allocator = Arena();
 
-    var publicKey = Uint8List.fromList(publicKeyPointer
-        .cast<Uint8>()
-        .asTypedList(bindings.crypto_kx_publickeybytes()));
-    var privateKey = Uint8List.fromList(privateKeyPointer
-        .cast<Uint8>()
-        .asTypedList(bindings.crypto_kx_secretkeybytes()));
+    // Pointer<UnsignedChar> publicKeyPointer =
+    //     allocator.allocate(bindings.crypto_kx_publickeybytes());
+    // Pointer<UnsignedChar> privateKeyPointer =
+    //     allocator.allocate(bindings.crypto_kx_secretkeybytes());
 
-    allocator.releaseAll();
+    // bindings.crypto_kx_keypair(publicKeyPointer, privateKeyPointer);
 
-    return CurveKeyPair(privateKey, publicKey);
+    // var publicKey = Uint8List.fromList(publicKeyPointer
+    //     .cast<Uint8>()
+    //     .asTypedList(bindings.crypto_kx_publickeybytes()));
+    // var privateKey = Uint8List.fromList(privateKeyPointer
+    //     .cast<Uint8>()
+    //     .asTypedList(bindings.crypto_kx_secretkeybytes()));
+
+    // allocator.releaseAll();
+
+    // return CurveKeyPair(privateKey, publicKey);
   }
 
   @override
   Future<List<int>> generateSharedKey(
       CurveKeyPair keyPair, List<int> publicKeyBytes) async {
-    var allocator = Arena();
+    final sessionKeys = sodium.crypto.kx.clientSessionKeys(
+        clientPublicKey: keyPair.publicKey,
+        clientSecretKey: sodium.secureCopy(keyPair.privateKey),
+        serverPublicKey: Uint8List.fromList(publicKeyBytes));
 
-    Pointer<UnsignedChar> secretKeyPointer =
-        allocator.allocate(bindings.crypto_kx_secretkeybytes());
+    return sessionKeys.rx.extractBytes();
+    // var allocator = Arena();
 
-    Pointer<Uint8> clientPublicKeyPointer =
-        allocator.allocate(bindings.crypto_kx_publickeybytes());
-    PointerBytes.copyData(clientPublicKeyPointer, keyPair.publicKey);
+    // Pointer<UnsignedChar> secretKeyPointer =
+    //     allocator.allocate(bindings.crypto_kx_secretkeybytes());
 
-    Pointer<Uint8> clientPrivateKeyPointer =
-        allocator.allocate(bindings.crypto_kx_sessionkeybytes());
-    PointerBytes.copyData(clientPrivateKeyPointer, keyPair.privateKey);
+    // Pointer<Uint8> clientPublicKeyPointer =
+    //     allocator.allocate(bindings.crypto_kx_publickeybytes());
+    // PointerBytes.copyData(clientPublicKeyPointer, keyPair.publicKey);
 
-    Pointer<Uint8> serverPublicKeyPointer =
-        allocator.allocate(bindings.crypto_kx_publickeybytes());
-    PointerBytes.copyData(serverPublicKeyPointer, publicKeyBytes);
+    // Pointer<Uint8> clientPrivateKeyPointer =
+    //     allocator.allocate(bindings.crypto_kx_sessionkeybytes());
+    // PointerBytes.copyData(clientPrivateKeyPointer, keyPair.privateKey);
 
-    bindings.crypto_kx_client_session_keys(
-        secretKeyPointer,
-        nullptr,
-        clientPublicKeyPointer.cast<UnsignedChar>(),
-        clientPrivateKeyPointer.cast<UnsignedChar>(),
-        serverPublicKeyPointer.cast<UnsignedChar>());
+    // Pointer<Uint8> serverPublicKeyPointer =
+    //     allocator.allocate(bindings.crypto_kx_publickeybytes());
+    // PointerBytes.copyData(serverPublicKeyPointer, publicKeyBytes);
 
-    var secretKey = Uint8List.fromList(secretKeyPointer
-        .cast<Uint8>()
-        .asTypedList(bindings.crypto_kx_secretkeybytes()));
+    // bindings.crypto_kx_client_session_keys(
+    //     secretKeyPointer,
+    //     nullptr,
+    //     clientPublicKeyPointer.cast<UnsignedChar>(),
+    //     clientPrivateKeyPointer.cast<UnsignedChar>(),
+    //     serverPublicKeyPointer.cast<UnsignedChar>());
 
-    allocator.releaseAll();
+    // var secretKey = Uint8List.fromList(secretKeyPointer
+    //     .cast<Uint8>()
+    //     .asTypedList(bindings.crypto_kx_secretkeybytes()));
 
-    return secretKey;
+    // allocator.releaseAll();
+
+    // return secretKey;
   }
 }

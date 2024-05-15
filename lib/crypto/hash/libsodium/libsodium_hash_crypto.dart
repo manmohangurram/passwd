@@ -1,35 +1,33 @@
-import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:ffi/ffi.dart';
+import 'package:sodium/sodium.dart';
 import 'package:passwd/crypto/hash/hash_crypto.dart';
-import 'package:passwd/crypto/hash/libsodium/blade2d_bindings.dart';
-import 'package:passwd/utils/pointer_bytes.dart';
 
 class LibsodiumHashCrypto extends HashCrypto {
-  LibsodiumHashCrypto(DynamicLibrary dynamicLibrary) {
-    bindings = Blake2dBindings(dynamicLibrary);
-  }
+  LibsodiumHashCrypto(this.sodium);
 
-  late Blake2dBindings bindings;
+  final Sodium sodium;
 
   @override
   Future<List<int>> hash(List<int> message, int hashLen) async {
-    final allocator = Arena();
+    return sodium.crypto.genericHash
+        .call(message: Uint8List.fromList(message), outLen: hashLen);
 
-    Pointer<UnsignedChar> hashBytesPointer = allocator.allocate(hashLen);
+    // final allocator = Arena();
 
-    Pointer<Uint8> messageBytesPointer = allocator.allocate(message.length);
-    PointerBytes.copyData(messageBytesPointer, message);
+    // Pointer<UnsignedChar> hashBytesPointer = allocator.allocate(hashLen);
 
-    bindings.crypto_generichash(hashBytesPointer, hashLen,
-        messageBytesPointer.cast<UnsignedChar>(), message.length, nullptr, 0);
+    // Pointer<Uint8> messageBytesPointer = allocator.allocate(message.length);
+    // PointerBytes.copyData(messageBytesPointer, message);
 
-    var hash =
-        Uint8List.fromList(hashBytesPointer.cast<Uint8>().asTypedList(hashLen));
+    // bindings.crypto_generichash(hashBytesPointer, hashLen,
+    //     messageBytesPointer.cast<UnsignedChar>(), message.length, nullptr, 0);
 
-    allocator.releaseAll();
+    // var hash =
+    //     Uint8List.fromList(hashBytesPointer.cast<Uint8>().asTypedList(hashLen));
 
-    return hash;
+    // allocator.releaseAll();
+
+    // return hash;
   }
 }

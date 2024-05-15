@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'dart:ffi';
 
+import 'package:sodium/sodium.dart';
 import 'package:passwd/crypto/cipher/libsodium/libsodium_cipher_crypto.dart';
 import 'package:passwd/crypto/cipher/models/cipher_key.dart';
 import 'package:passwd/features/record/domain/cipher_record.dart';
@@ -8,8 +8,8 @@ import 'package:passwd/features/record/domain/metadata.dart';
 import 'package:passwd/features/record/domain/record.dart';
 
 class RecordCrypto {
-  RecordCrypto(this.sharedKey, DynamicLibrary dynamicLibrary) {
-    cipherCrypto = LibSodiumCipherCrypto(dynamicLibrary);
+  RecordCrypto(this.sharedKey, Sodium sodium) {
+    cipherCrypto = LibSodiumCipherCrypto(sodium);
   }
 
   late List<int> sharedKey;
